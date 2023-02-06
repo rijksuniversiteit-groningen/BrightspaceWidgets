@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html><head>
+<script src="/shared/Widgets/CourseInfo/courseinfo.js?v=1.1"></script>
+<script>window.orgUnitId={OrgUnitId}</script>
+</head>
+<body style="font-family: 'Lato', sans-serif;color: #202122;">
+<div style="float: left;"><strong id="courseLabel">Course:</strong> {OrgUnitCode}</div>
+<div style="float: right; display:none;" id="courseStatus">
+	<img id="courseStatusImg" width="16">
+	<span id="courseStatusLabel">Course is</span> 
+	<a href="/d2l/lp/manageCourses/course_offering_info_viewedit.d2l?ou={OrgUnitId}" id="courseActiveStatus">&hellip;</a>.
+	<a href="https://edusupport.rug.nl/1920991266/" target="_blank"><img src="/shared/Widgets/CourseInfo/help.svg" width="16" alt="Help" title="Help on how to make your course active or inactive" id="help"></a>
+</div>
+</body></html>
