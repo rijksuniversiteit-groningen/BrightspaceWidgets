@@ -11,6 +11,8 @@ window.addEventListener('DOMContentLoaded', (loadEvent) => {
 			locale: 'nl-NL',
 		}
 	}
+
+	window.hideProgressBar = window.hideProgressBar || false
 	
 	const lang = document.documentElement.lang.startsWith('nl') ? terms.nl : terms.en;
 	const tocElement = document.getElementById('tableOfContents');
@@ -60,18 +62,21 @@ window.addEventListener('DOMContentLoaded', (loadEvent) => {
 		if (module.Description.Text && module.Description.Text != '') {
 			tocLink.title = module.Description.Text;
 		}
-		
-		const progContainer = document.createElement('span');
-		progContainer.id = `prog${module.ModuleId}`;
-		progContainer.className = 'label-center';
-		if (ratio.read === 0) {
-			progContainer.classList.add('empty');
-		}
-		generateProgressBar(progContainer, 100 * ratio.read / ratio.total);
-		
-		row.appendChild(progContainer);
+
 		row.appendChild(tocLink);
 		tocElement.appendChild(row);
+
+		if (!window.hideProgressBar) {
+			const progContainer = document.createElement('span');
+			progContainer.id = `prog${module.ModuleId}`;
+			progContainer.className = 'label-center';
+			if (ratio.read === 0) {
+				progContainer.classList.add('empty');
+			}
+			generateProgressBar(progContainer, 100 * ratio.read / ratio.total);
+			
+			row.appendChild(progContainer);
+		}
 	}
 	
 	function generateProgressBar(element, percentage) {

@@ -19,3 +19,6 @@ _Screenshot of the Table of Contents widget_
 - Upload the files in [public/](public) to Brightspace Public Files in
   `/shared/Widgets/TableOfContents`
 - Add the widget to the course homepage(s).
+
+## Hide progress indicators
+By default, the progress indicators will be visible. It is possible to hide the progress indicators by passing the variable `window.hideProgressBar=true`.
