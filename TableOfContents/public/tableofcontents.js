@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', (loadEvent) => {
+window.addEventListener('DOMContentLoaded', () => {
 	const terms = {
 		en: {
 			noContent: 'This course has no content currently available.',
@@ -17,41 +17,27 @@ window.addEventListener('DOMContentLoaded', (loadEvent) => {
 	const lang = document.documentElement.lang.startsWith('nl') ? terms.nl : terms.en;
 	const tocElement = document.getElementById('tableOfContents');
 
-	fetch(`/d2l/api/le/1.41/${window.orgUnitId}/content/toc`)
-		.then((response) => response.json())
-		.then((data) => {
-			if (data.Modules.length === 0) {
+	Promise.all([
+		fetch(`/d2l/api/le/1.85/${window.orgUnitId}/content/toc`).then(r => r.json()),
+		fetch(`/d2l/api/le/1.85/${window.orgUnitId}/content/completions/mycount/?level=2`).then(r => r.json()),
+	])
+		.then(([toc, completions]) => {
+			completions = completions?.status === 403 ? [] : completions.Objects;
+			if (toc.Modules.length === 0) {
 				tocElement.innerText = lang.noContent;
-			}
-			else {
-				for (const module of data.Modules) {
-					renderModule(module);
+			} else {
+				for (const module of toc.Modules) {
+					const completionData = completions.find(c => c.ObjectId === module.ModuleId);
+					renderModule(module, completionData);
 				}
 			}
 		})
 		.catch((error) => {
 			tocElement.innerText = lang.error;
 			console.error(error);
-	});
+		});
 	
-	function getCompletionRatio(module) {
-		const validTopics = module.Topics.filter(topic => !topic.IsBroken);
-		
-		let total = validTopics.length;
-		let read = validTopics.filter(topic => !topic.Unread).length;
-
-		for (const subModule of module.Modules) {
-			const subRatio = getCompletionRatio(subModule);
-			total += subRatio.total;
-			read += subRatio.read;
-		}
-
-		return { read: read, total: total };
-	}
-	
-	function renderModule(module) {
-		const ratio = getCompletionRatio(module);
-		
+	function renderModule(module, completionData) {
 		const row = document.createElement('div');
 		row.className = 'tocRow';
 		
@@ -67,13 +53,17 @@ window.addEventListener('DOMContentLoaded', (loadEvent) => {
 		tocElement.appendChild(row);
 
 		if (!window.hideProgressBar) {
+			const percentage = completionData === undefined || completionData.RequiredItems === 0
+				? 0
+				: 100 * completionData.CompletedItems / completionData.RequiredItems;
+
 			const progContainer = document.createElement('span');
 			progContainer.id = `prog${module.ModuleId}`;
 			progContainer.className = 'label-center';
-			if (ratio.read === 0) {
+			if (percentage === 0) {
 				progContainer.classList.add('empty');
 			}
-			generateProgressBar(progContainer, 100 * ratio.read / ratio.total);
+			generateProgressBar(progContainer, percentage);
 			
 			row.appendChild(progContainer);
 		}
@@ -83,11 +73,11 @@ window.addEventListener('DOMContentLoaded', (loadEvent) => {
 		new ldBar(element, {
 			preset: 'circle',
 			value: percentage,
-			precision: '0.1',
+			precision: '1',
 			stroke: '#3970bf',
 			'stroke-trail': '#e4e8f1',
-			'stroke-trail-width': 8,
-			'stroke-width': 8
+			'stroke-trail-width': 12,
+			'stroke-width': 12
 		});
 	}
 });
