@@ -17,11 +17,18 @@ window.addEventListener('DOMContentLoaded', () => {
 	const lang = document.documentElement.lang.startsWith('nl') ? terms.nl : terms.en;
 	const tocElement = document.getElementById('tableOfContents');
 
-	Promise.all([
+	Promise.allSettled([
 		fetch(`/d2l/api/le/1.88/${window.orgUnitId}/content/toc`).then(data => data.json()),
 		fetchPagedData(`/d2l/api/le/1.88/${window.orgUnitId}/content/completions/mycount/?level=2`)
 	])
-		.then(([toc, completions]) => {
+		.then(([tocResult, completionsResult]) => {
+			if (tocResult.status === 'rejected' || tocResult.value.status !== 200) {
+				throw new Error('Fetching /toc failed');
+			}
+			const toc = tocResult.value;
+			// results in an error of the user is a lecturer, do not show completions then.
+			const completions = completionsResult.status === 'rejected' ? [] : completionsResult.value;
+
 			if (toc.Modules.length === 0) {
 				tocElement.innerText = lang.noContent;
 			} else {
