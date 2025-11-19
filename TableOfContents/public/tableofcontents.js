@@ -18,11 +18,10 @@ window.addEventListener('DOMContentLoaded', () => {
 	const tocElement = document.getElementById('tableOfContents');
 
 	Promise.all([
-		fetch(`/d2l/api/le/1.85/${window.orgUnitId}/content/toc`).then(r => r.json()),
-		fetch(`/d2l/api/le/1.85/${window.orgUnitId}/content/completions/mycount/?level=2`).then(r => r.json()),
+		fetch(`/d2l/api/le/1.88/${window.orgUnitId}/content/toc`).then(data => data.json()),
+		fetchPagedData(`/d2l/api/le/1.88/${window.orgUnitId}/content/completions/mycount/?level=2`)
 	])
 		.then(([toc, completions]) => {
-			completions = completions?.status === 403 ? [] : completions.Objects;
 			if (toc.Modules.length === 0) {
 				tocElement.innerText = lang.noContent;
 			} else {
@@ -45,7 +44,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		tocLink.href = `/d2l/le/lessons/${window.orgUnitId}/units/${module.ModuleId}`;
 		tocLink.target = '_top';
 		tocLink.innerText = module.Title;
-		if (module.Description.Text && module.Description.Text != '') {
+		if (module.Description.Text && module.Description.Text !== '') {
 			tocLink.title = module.Description.Text;
 		}
 
@@ -67,6 +66,25 @@ window.addEventListener('DOMContentLoaded', () => {
 			
 			row.appendChild(progContainer);
 		}
+	}
+
+	async function fetchPagedData(url) {
+		let fetchUrl = url;
+		let objects = [];
+		do {
+			await fetch(fetchUrl)
+				.then(data => data.json())
+				.then(json => {
+					objects.push(...json.Objects);
+					fetchUrl = json.Next;
+				})
+				.catch(error => {
+					fetchUrl = null;
+					console.log(`An error occurred while fetching paged content. Stop fetching further pages.\nError: ${error}.`);
+					return Promise.reject();
+				});
+		} while (fetchUrl !== null);
+		return objects;
 	}
 	
 	function generateProgressBar(element, percentage) {
