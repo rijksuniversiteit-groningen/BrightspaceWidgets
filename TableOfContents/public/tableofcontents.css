@@ -1,5 +1,5 @@
 #tableOfContents {
-	max-height: 500px;
+	max-height: 480px;
 	overflow-y: auto;
 	padding-bottom: 6px; /* to prevent scrollbar from appearing */
 }
