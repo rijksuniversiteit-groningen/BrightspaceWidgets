@@ -40,7 +40,7 @@ window.addEventListener('load', (loadEvent) => {
 	document.getElementById('help').title = lang.altHelp;
 
 
-	fetch(`/d2l/api/lp/1.51/courses/${window.orgUnitId}`)
+	fetch(`/d2l/api/lp/1.53/courses/${window.orgUnitId}`)
 		.then((response) => {
 			if (response.status !== 200) {
 				console.info(`Course status not available: status code ${response.status}.`);
