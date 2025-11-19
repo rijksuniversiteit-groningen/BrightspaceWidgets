@@ -22,7 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		fetchPagedData(`/d2l/api/le/1.88/${window.orgUnitId}/content/completions/mycount/?level=2`)
 	])
 		.then(([tocResult, completionsResult]) => {
-			if (tocResult.status === 'rejected' || tocResult.value.status !== 200) {
+			if (tocResult.status === 'rejected' || !tocResult.value.Modules) {
 				throw new Error('Fetching /toc failed');
 			}
 			const toc = tocResult.value;
